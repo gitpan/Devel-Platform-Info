@@ -1,4 +1,4 @@
-package Devel::Platform::Info::Irix;
+package Devel::Platform::Info::Solaris;
 
 use strict;
 use warnings;
@@ -9,15 +9,13 @@ $VERSION = '0.03';
 #----------------------------------------------------------------------------
 
 my %commands = (
-    '_issue1'   => 'cat /etc/issue',
-    '_issue2'   => 'cat /etc/.issue',
-    '_uname'    => 'uname -a',
+    '_uname1'   => 'uname -a',
+    '_showrev'  => 'showrev -a',
+    '_release'  => 'cat /etc/release',
+    '_isainfo'  => '/usr/bin/isainfo -kv',
     'kname'     => 'uname -s',
     'kvers'     => 'uname -r',
-    'osname'    => 'uname -o',
     'archname'  => 'uname -m',
-
-    '_irix1'   => 'uname -R',   # IRIX specific
 );
 
 #----------------------------------------------------------------------------
@@ -42,11 +40,16 @@ sub get_info {
 
     $self->{info}{osflag}   = $^O;
     $self->{info}{kernel}   = lc($self->{info}{kname}) . '-' . $self->{info}{kvers};
-    $self->{info}{osname}   = 'IRIX';
-    $self->{info}{oslabel}  = 'IRIX';
-    $self->{info}{osvers}   = $self->{info}{kvers};
-    $self->{info}{is32bit}  = $self->{info}{kname} !~ /64/ ? 1 : 0;
-    $self->{info}{is64bit}  = $self->{info}{kname} =~ /64/ ? 1 : 0;
+    $self->{info}{is32bit}  = $self->{info}{_isainfo} !~ /64-bit/s ? 1 : 0;
+    $self->{info}{is64bit}  = $self->{info}{_isainfo} =~ /64-bit/s ? 1 : 0;
+
+    ($self->{info}{osname}) = $self->{info}{_release} =~ /^(\S+)/;
+    $self->{info}{oslabel}  = $self->{info}{osname};
+    $self->{info}{osvers} = $self->{info}{kname};
+    $self->{info}{osvers} =~ s/^5/2/;   # a bit of a hack :(
+
+    # Question: Anyone know how to get the real version number for OpenSolaris?
+    # i.e. "2008.05" or "2009.06"
 
     return $self->{info};
 }
@@ -59,17 +62,17 @@ __END__
 
 =head1 NAME
 
-Devel::Platform::Info::Irix - Retrieve Irix platform metadata
+Devel::Platform::Info::Solaris - Retrieve Solaris platform metadata
 
 =head1 SYNOPSIS
 
-  use Devel::Platform::Info::Irix;
-  my $info = Devel::Platform::Info::Irix->new();
+  use Devel::Platform::Info::Solaris;
+  my $info = Devel::Platform::Info::Solaris->new();
   my $data = $info->get_info();
 
 =head1 DESCRIPTION
 
-This module is a driver to determine platform metadata regarding the Irix
+This module is a driver to determine platform metadata regarding the Solaris
 operating system. It should be called indirectly via it's parent 
 Devel::Platform::Info
 
@@ -91,7 +94,7 @@ Simply constructs the object.
 
 =item * get_info
 
-Returns a hash reference to the Irix platform metadata.
+Returns a hash reference to the Solaris platform metadata.
 
 Returns the following keys:
 
@@ -114,7 +117,9 @@ Returns the following keys:
 
 The following links were used to understand how to retrieve the metadata:
 
-  * http://www.faqs.org/faqs/sgi/faq/admin/section-2.html
+  * http://www.symantec.com/connect/blogs/commands-find-out-solaris-os-version-ralus-rmal-issues
+  * http://docs.sun.com/app/docs/doc/816-0211/6m6nc676p?a=view
+  * http://docs.sun.com/app/docs/doc/816-5138/6mba6ua58?a=view
 
 =head1 BUGS, PATCHES & FIXES
 
