@@ -4,13 +4,13 @@ use strict;
 use warnings;
 
 use vars qw($VERSION);
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 #----------------------------------------------------------------------------
 
 my %commands = (
     '_uname1'   => 'uname -a',
-    '_showrev'  => 'showrev -a',
+    '_showrev'  => 'showrev -a | grep -v "^Patch"',
     '_release'  => 'cat /etc/release',
     '_isainfo'  => '/usr/bin/isainfo -kv',
     'kname'     => 'uname -s',
@@ -33,17 +33,16 @@ sub get_info {
 
     for my $cmd (keys %commands) {
         $self->{cmds}{$cmd} = `$commands{$cmd} 2>/dev/null`;
-        $self->{info}{source} .= "$commands{$cmd}\n$self->{cmds}{$cmd}\n";
         $self->{cmds}{$cmd} =~ s/\s+$//s;
         $self->{info}{$cmd} = $self->{cmds}{$cmd}   if($cmd =~ /^[^_]/);
     }
 
     $self->{info}{osflag}   = $^O;
     $self->{info}{kernel}   = lc($self->{info}{kname}) . '-' . $self->{info}{kvers};
-    $self->{info}{is32bit}  = $self->{info}{_isainfo} !~ /64-bit/s ? 1 : 0;
-    $self->{info}{is64bit}  = $self->{info}{_isainfo} =~ /64-bit/s ? 1 : 0;
+    $self->{info}{is32bit}  = $self->{cmds}{_isainfo} !~ /64-bit/s ? 1 : 0;
+    $self->{info}{is64bit}  = $self->{cmds}{_isainfo} =~ /64-bit/s ? 1 : 0;
 
-    ($self->{info}{osname}) = $self->{info}{_release} =~ /^(\S+)/;
+    ($self->{info}{osname}) = $self->{cmds}{_release} =~ /^(\S+)/;
     $self->{info}{oslabel}  = $self->{info}{osname};
     $self->{info}{osvers} = $self->{info}{kname};
     $self->{info}{osvers} =~ s/^5/2/;   # a bit of a hack :(
@@ -51,6 +50,7 @@ sub get_info {
     # Question: Anyone know how to get the real version number for OpenSolaris?
     # i.e. "2008.05" or "2009.06"
 
+    $self->{info}{source}{$commands{$_}} = $self->{cmds}{$_}    for(keys %commands);
     return $self->{info};
 }
 
