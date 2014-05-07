@@ -1,4 +1,4 @@
-package Devel::Platform::Info::BSD;
+package Devel::Platform::Info::BeOS;
 
 use strict;
 use warnings;
@@ -46,13 +46,18 @@ sub get_info {
     $self->{info}{is32bit}  = $self->{info}{archname} !~ /(64|alpha)/ ? 1 : 0;
     $self->{info}{is64bit}  = $self->{info}{archname} =~ /(64|alpha)/ ? 1 : 0;
 
-    # NOTE: 'sparc64' (64bit) and 'sparc' (32bit) both look like they identify
-    # themselves as archname = 'sparc'. If true, is there any other way to
-    # easily distinguish the difference?
-
     $self->{info}{source}{$commands{$_}} = $self->{cmds}{$_}    for(keys %commands);
     return $self->{info};
 }
+
+sub _beos_versions {
+    return {
+        'R4.5'  => 'Genki',
+        'R5'    => 'Maui',
+        'R5.1'  => 'Dano',
+    };
+}
+
 
 #----------------------------------------------------------------------------
 
@@ -62,19 +67,23 @@ __END__
 
 =head1 NAME
 
-Devel::Platform::Info::BSD - Retrieve BSD platform metadata
+Devel::Platform::Info::BeOS - Retrieve BeOS platform metadata
 
 =head1 SYNOPSIS
 
-  use Devel::Platform::Info::BSD;
-  my $info = Devel::Platform::Info::BSD->new();
+  use Devel::Platform::Info::BeOS;
+  my $info = Devel::Platform::Info::BeOS->new();
   my $data = $info->get_info();
 
 =head1 DESCRIPTION
 
-This module is a driver to determine platform metadata regarding the BSD
+This module is a driver to determine platform metadata regarding the BeOS
 family of operating systems. It should be called indirectly via it's parent
-Devel::Platform::Info
+Devel::Platform::Info.
+
+Note that BeOS was last release in 2001, however deriatives have since been
+release, most notably Haiku, which was last released in 2012. As such, this
+module it experimental, and may be cloned to reference Haiku in the future.
 
 =head1 INTERFACE
 
@@ -94,7 +103,7 @@ Simply constructs the object.
 
 =item * get_info
 
-Returns a hash reference to the BSD platform metadata.
+Returns a hash reference to the BeOS platform metadata.
 
 Returns the following keys:
 
@@ -112,15 +121,6 @@ Returns the following keys:
   kvers
 
 =back
-
-=head1 REFERENCES
-
-The following links were used to understand how to retrieve the metadata:
-
-  * http://nixcraft.com/all-about-freebsd-openbsd-netbsd/234-freebsd-how-find-out-kernel-version.html
-  * http://www.netbsd.org/ports/
-
-Thanks to Chris 'BINGOS' Williams for the pointers to the appropriate links.
 
 =head1 BUGS, PATCHES & FIXES
 

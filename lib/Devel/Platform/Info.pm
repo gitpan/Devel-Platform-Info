@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use vars qw($VERSION);
-$VERSION = '0.12';
+$VERSION = '0.13';
 
 #----------------------------------------------------------------------------
 
@@ -38,6 +38,8 @@ my %map = (
     'solaris'       => 'Solaris',
     'sunos'         => 'Solaris',
 
+    'beos'          => 'BeOS',
+
     # Windows family OSes
     'dos'           => 'Win32',
     'os2'           => 'Win32',
@@ -60,6 +62,9 @@ my %map = (
     'beos'          => 'Linux',
     'machten'       => 'Linux',
     'mpeix'         => 'Linux',
+    'bitrig'        => 'Linux',
+    'minix'         => 'Linux',
+    'nto'           => 'Linux',
 );
 
 #----------------------------------------------------------------------------
